@@ -1,4 +1,8 @@
+# Virtual environments
 /ai_server_venv
+/venv
+
+# Environment variables
 .env
 
 # chche files
