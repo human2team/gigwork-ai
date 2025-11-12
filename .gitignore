@@ -1,2 +1,7 @@
 /ai_server_venv
 .env
+
+# chche files
+__pycache__/
+*.pyc
+*.pyo
