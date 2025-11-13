@@ -18,7 +18,7 @@ DEFAULT_CONDITION = {
     "start_time": None,
     "end_time": None,
     "hourly_wage": None,
-    "requirements": None,
+    "requirements": None, # long text
     "category": None
 }
 
