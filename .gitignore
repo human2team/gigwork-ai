@@ -1,7 +1,8 @@
 # Virtual environments
 /ai_server_venv
 /venv
-/.venv
+.venv/
+venv/
 # Environment variables
 .env
 
