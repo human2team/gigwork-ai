@@ -76,6 +76,7 @@ def collect_conditions(state):
         if v not in (None, "", []):
             merged[k] = v
 
-    state.condition = merged
+    state.condition = merged    
+    print(f'state.condition============= {state.condition}')
     state.response = "조건을 업데이트했습니다."
     return state
