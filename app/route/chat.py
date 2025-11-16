@@ -22,7 +22,7 @@ def chat_endpoint(payload: ChatRequest):
             condition=payload.condition or {},
             search=payload.search,
         )
-
+        print(f'payload========={payload}')
         result_state = workflow.invoke(state)
 
         return {

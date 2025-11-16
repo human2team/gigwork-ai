@@ -13,15 +13,12 @@ CATEGORIES = [
 ]
 
 SCHEMA_HINT = f"""
-너는 사용자의 문장에서 아르바이트 조건을 추출한다.
-반드시 아래 JSON 형태로 출력하라.
+너는 사용자의 문장에서 구직, 취업, 아르바이트 조건을 추출한다.
+반드시 아래 1) JSON 형태로 출력하라.
 불명확한 값은 null로 둔다.
-또한 카테고리를 추출할 경우 아래의 21개 중 가장 관련된 하나를 선택해야만 한다.
+또한 카테고리를 추출할 경우 2) 아래 중 가장 관련된 하나를 선택해야만 한다.
 
-카테고리 목록:
-{', '.join(CATEGORIES)}
-
-JSON 예시:
+1) JSON 예시:
 {{
   "gender": "male|female|any|null",
   "age": null | number,
@@ -33,6 +30,9 @@ JSON 예시:
   "requirements": "string|null",
   "category": "string|null"
 }}
+
+2) 카테고리 목록:
+{', '.join(CATEGORIES)}
 """
 
 def _safe_json_parse(text: str) -> Dict[str, Any]:
@@ -44,6 +44,8 @@ def _safe_json_parse(text: str) -> Dict[str, Any]:
             end = text.rfind("}")
             if start != -1 and end != -1:
                 return json.loads(text[start:end+1])
+            else:
+                return {}    
         except Exception:
             return {}
 
@@ -58,22 +60,22 @@ def _normalize(cond: Dict[str, Any]) -> Dict[str, Any]:
         "hourly_wage": None,
         "requirements": None,
         "category": None
-    }
+    } # _normalize({"gender": "male", "age": 30}) => gender와 age만 바뀌고, 나머지 필드는 None으로 채워진 딕셔너리가 반환
     base.update(cond or {})
     return base
 
 def collect_conditions(state):
     user_text = state.text
     messages = [
-        {"role": "system", "content": SCHEMA_HINT},
-        {"role": "user", "content": user_text}
+        { "role": "system", "content": SCHEMA_HINT },
+        { "role": "user", "content": user_text }
     ]
     raw = llm.chat(messages) or "{}"
     extracted = _normalize(_safe_json_parse(raw))
 
     merged = dict(state.condition or {})
     for k, v in extracted.items():
-        if v not in (None, "", []):
+        if v not in (None, "", [], {}):
             merged[k] = v
 
     state.condition = merged
