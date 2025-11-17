@@ -29,6 +29,7 @@ def vector_search(state):
 
     try:
         rows = db.execute_query(query, params)
+        print(f'rows@@@@@{rows}')
     except Exception as e:
         state.response = f"DB 검색 중 오류 발생: {e}"
         state.result = []

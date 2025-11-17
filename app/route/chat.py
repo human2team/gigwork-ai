@@ -16,12 +16,26 @@ class ChatRequest(BaseModel):
 @router.post("/", summary="Chat Endpoint", description="LangGraph 챗봇 엔드포인트")
 def chat_endpoint(payload: ChatRequest):
     try:
+        # search가 true이고 text가 있으면 condition.requirements에 text 값 추가
+        if payload.search and payload.text:
+            if payload.condition is None:
+                payload.condition = {}
+            payload.condition['requirements'] = payload.text
+
         state = ChatState(
             user_id=payload.user_id,
             text=payload.text,
             condition=payload.condition or {},
             search=payload.search,
         )
+        
+        # # search가 true이고 text가 있으면 condition.requirements에 text 값 추가
+        # if payload.search and payload.text:
+        #     if payload.condition is None:
+        #         payload.condition = {}
+        #     payload.condition['requirements'] = payload.text
+        #     state['condition'] = payload.condition
+        
         print(f'payload========={payload}')
         result_state = workflow.invoke(state)
 
