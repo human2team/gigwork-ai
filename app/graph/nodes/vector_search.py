@@ -4,15 +4,11 @@ from app.db.database import PostgresDB
 embedder = Embedder()
 db = PostgresDB()
 
-# 테스트 테이블에서 벡터 유사도 기반으로 검색
-# 실제 테이블로 수정 필요
-
 def vector_search(state):
     print("[vector_search] 실행됨")
 
     text = state.condition.get("requirements")
     embedding = embedder.create_embedding(text)
-    print("[vector_search] 실행됨11")
     
     # embedding을 문자열로 변환 (pgvector 호환)
     if isinstance(embedding, list):
@@ -50,17 +46,14 @@ def vector_search(state):
     params = (embedding_str, embedding_str, similarity_threshold, embedding_str, limit)
 
     try:
-        print("[vector_search] 실행됨222")
         rows = db.execute_query(query, params)
         print(f'rows######################{rows}')
     except Exception as e:
-        print(f"[vector_search] 실행됨333 {e}")
         state.response = f"DB 검색 중 오류 발생: {e}"
         state.result = []
         return state
 
     state.result = rows
-    print("[vector_search] 실행됨444")
     state.response = f"벡터 유사도 기반으로 {len(rows)}개의 알바를 찾았습니다."
 
     return state
