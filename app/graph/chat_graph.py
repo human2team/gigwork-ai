@@ -43,11 +43,11 @@ graph.add_node("vector_search", vector_search)
 
 graph.set_entry_point("check_search")
 
-# 1-1) check_search > classify_input > collect_conditions
-# 1-2) check_search > classify_input > END
+# 1-1) check_search=false > classify_input > collect_conditions
+# 1-2) check_search=false > classify_input > END
 
-# 2-1) check_search > decide_search_type > vector_search
-# 2-2) check_search > decide_search_type > sql_search
+# 2-1) check_search=true > decide_search_type > vector_search
+# 2-2) check_search=true > decide_search_type > sql_search
 
 graph.add_conditional_edges(
     "check_search",
