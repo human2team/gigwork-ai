@@ -3,26 +3,38 @@ name: Deploy AI Server
 on:
   push:
     branches: ["main"]
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Upload AI server source code
+      # ----------------------
+      # 서버로 소스 전송
+      # ----------------------
+      - name: Upload AI source code
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "ai/**"
-          target: "/deploy/ai"
-          strip_components: 1
+          target: "/deploy/ai_app"
+          overwrite: true
+          strip_components: 0
+          source: |
+            main.py
+            Dockerfile
+            requirements.txt
+            app/**
+            .env.example
 
-      - name: Rebuild AI docker container
+      # ----------------------
+      # 서버에서 AI 도커 재빌드
+      # ----------------------
+      - name: Rebuild AI server container
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -30,5 +42,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /deploy
-            docker compose build ai
+            docker compose stop ai || true
+            docker compose rm -f ai || true
+            docker compose build ai --no-cache
             docker compose up -d ai
