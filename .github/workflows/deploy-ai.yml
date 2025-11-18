@@ -1,0 +1,34 @@
+name: Deploy AI Server
+
+on:
+  push:
+    branches: ["main"]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Upload AI server source code
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "ai/**"
+          target: "/deploy/ai"
+          strip_components: 1
+
+      - name: Rebuild AI docker container
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /deploy
+            docker compose build ai
+            docker compose up -d ai
