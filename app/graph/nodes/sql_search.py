@@ -45,9 +45,12 @@ def sql_search(state):
         rows = db.execute_query(query, params)
         print(f'rows######################{rows}')
     except Exception as e:
+        print(f'e$$$$$$$$$$$$$$$$$$$$$$$$$$${e}')
         state.response = f"DB 검색 중 오류 발생: {e}"
         state.result = []
         return state
+    finally:
+        db.close()
 
     state.result = rows
     state.response = f"일반 SQL 검색으로 {len(rows)}개의 알바를 찾았습니다."

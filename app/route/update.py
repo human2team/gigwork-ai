@@ -4,9 +4,11 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
 from app.vector.embedder import Embedder
+from app.vector.embedder_ko import EmbedderKo
 from app.db.database import PostgresDB
 
 embedder = Embedder()
+embedder_ko = EmbedderKo()
 db = PostgresDB()
 
 router = APIRouter()
@@ -39,19 +41,22 @@ def chat_endpoint(payload: UpdateRequest):
                 desc = row['description']  # RealDictCursor이므로 딕셔너리처럼 접근
                 print(f'{id}desc@@@@@{desc}')
                 embedding = embedder.create_embedding(desc)
+                embedding_ko = embedder_ko.create_embedding(desc)
                 print(f'embedding type: {type(embedding)}, length: {len(embedding) if isinstance(embedding, list) else "N/A"}')
-                
+                                
                 # pgvector는 리스트를 문자열 형태로 변환 필요
                 # embedding이 리스트일 경우 문자열로 변환. pgvector는 '[0.1, 0.2, ...]' 형태의 문자열을 받음
                 if isinstance(embedding, list):
                     embedding_str = str(embedding)
+                    embedding_str_ko = str(embedding_ko)
                 else:
                     embedding_str = embedding
+                    embedding_str_ko = embedding_ko
                 
                 query = """
-                    UPDATE jobs SET embedding = %s WHERE id = %s
+                    UPDATE jobs SET embedding = %s, embedding_ko = %s WHERE id = %s
                 """
-                params = (embedding_str, id)
+                params = (embedding_str, embedding_str_ko, id)
                 db.execute_non_query(query, params)
                 print(f'✅ ID {id} 업데이트 완료')
             else:
@@ -59,9 +64,11 @@ def chat_endpoint(payload: UpdateRequest):
                 code = "-1"
 
         except Exception as e:
+            print(f'e$$$$$$$$$$$$$$$$$$$$$$$$$$${e}')
             msg = f"DB 검색 중 오류 발생: {e}"
             code = "-1"
         finally:
+            db.close()
             return {
                 "code": code,
                 "msg": msg
