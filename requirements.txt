@@ -10,3 +10,5 @@ openai
 
 numpy
 requests
+pydantic
+sentence-transformers
