@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
-from app.graph.chat_graph import workflow, ChatState
+from app.graph.graph import workflow, ChatState
 
 router = APIRouter()
 
