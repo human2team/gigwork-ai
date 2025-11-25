@@ -1,17 +1,15 @@
 # app/graph/graph.py
 from langgraph.graph import StateGraph, END
 from app.graph.state import ChatState
-from app.graph.nodes import (
-    entry_router,
-    intent_classifier_normal,
-    intent_classifier_clarification,
-    clarification_handler,
-    post_intent_router,
-    condition_add_handler,
-    condition_modify_handler,
-    postprocess_router,
-    search_handler,
-)
+from app.graph.nodes.clarification_handler import clarification_handler
+from app.graph.nodes.condition_add_handler import condition_add_handler
+from app.graph.nodes.condition_modify_handler import condition_modify_handler
+from app.graph.nodes.intent_classifier_clarification import intent_classifier_clarification
+from app.graph.nodes.intent_classifier_normal import intent_classifier_normal
+from app.graph.nodes.post_intent_router import post_intent_router
+from app.graph.nodes.postprocess_router import postprocess_router
+from app.graph.nodes.search_handler import search_handler
+from app.graph.nodes.entry_router import entry_router
 
 graph = StateGraph(ChatState)
 
