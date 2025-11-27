@@ -16,19 +16,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # AI 코드 전송 (환경파일은 안 보냄)
+      # 필요한 파일만 업로드
       - name: Upload AI source to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./"
+          source: |
+            ./app/
+            ./main.py
+            ./requirements.txt
+            ./Dockerfile
           target: "/deploy/ai"
           rm: true
           debug: true
 
-      # 서버에서 직접 .env 생성 + 컨테이너 재기동
+      # 서버에서 .env 생성 + 컨테이너 재시작
       - name: Restart AI container and write .env on server
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -39,14 +43,7 @@ jobs:
           script: |
             cd /deploy
 
-            # /deploy/.env (docker-compose용) 갱신
             cat > .env << EOF
-            OPENAI_API_KEY=${OPENAI_API_KEY}
-            DB_URL=${DB_URL}
-            EOF
-
-            # 필요하면 /deploy/ai/.env 도 생성 (Dockerfile에서 COPY .env 쓰는 경우)
-            cat > ai/.env << EOF
             OPENAI_API_KEY=${OPENAI_API_KEY}
             DB_URL=${DB_URL}
             EOF
