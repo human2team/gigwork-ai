@@ -27,14 +27,15 @@ jobs:
           target: "/deploy/ai"
           rm: true
 
-      - name: Upload .env to /deploy
+      - name: Upload .env to /deploy/ai
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: ".env"
-          target: "/deploy/.env"
+          target: "/deploy/ai/.env"
+          overwrite: true
 
       - name: Restart AI container
         uses: appleboy/ssh-action@v1.0.0
