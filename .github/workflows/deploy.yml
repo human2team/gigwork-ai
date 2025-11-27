@@ -27,6 +27,7 @@ jobs:
           source: "./"
           target: "/deploy/ai"
           rm: true
+          debug: true
 
       # 서버에서 직접 .env 생성 + 컨테이너 재기동
       - name: Restart AI container and write .env on server
