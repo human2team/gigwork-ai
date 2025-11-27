@@ -20,7 +20,7 @@ class LLMClient:
             response = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
-                temperature=0,
+                temperature=1,
             )
             return response.choices[0].message.content
         except Exception as e:
