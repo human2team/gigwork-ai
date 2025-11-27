@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
-from app.graph.chat_graph import workflow, ChatState
+from app.graph.graph import workflow, ChatState  # workflow가 반드시 함수/런너 객체여야 함
 
 router = APIRouter()
 
@@ -23,6 +23,7 @@ def chat_endpoint(payload: ChatRequest):
             search=payload.search,
         )
 
+        # workflow가 함수/런너 객체일 때만 정상 동작
         result_state = workflow.invoke(state)
 
         return {
