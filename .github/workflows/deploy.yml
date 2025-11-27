@@ -12,7 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # AI 코드만 전송 (docker-compose.yml, .env 유지)
+      - name: Create .env file
+        run: |
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+
       - name: Upload AI source to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -23,15 +27,23 @@ jobs:
           target: "/deploy/ai"
           rm: true
 
-      - name: Restart AI container (using existing docker-compose.yml and .env)
+      - name: Upload .env to /deploy
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: ".env"
+          target: "/deploy/.env"
+
+      - name: Restart AI container
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
           script: |
             cd /deploy
             docker compose stop ai
-            docker compose build ai
+            docker compose build --no-cache ai
             docker compose up -d ai
