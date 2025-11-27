@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: ".env"
-          target: "/deploy/ai/.env"
+          target: "/deploy/ai"
           overwrite: true
 
       - name: Restart AI container
