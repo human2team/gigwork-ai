@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>[Test] GigWork Chatbot Page</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #ffffff;
+      color: #333;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 16px 24px;
+      gap: 16px;
+    }
+    .top-row {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+    }
+    .chat-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .chat-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .chat-subtitle {
+      font-size: 13px;
+      color: #666;
+    }
+    .chat-clear-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #ffffff;
+      color: #666;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-clear-btn:hover {
+      background: #f5f5f5;
+      border-color: #ff5252;
+      color: #ff5252;
+    }
+    .chat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      background: #f9f9f9;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .msg-row.bot {
+      justify-content: flex-start;
+    }
+    .msg-row.user {
+      justify-content: flex-end;
+    }
+    .msg-bubble {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+    }
+    .msg-bubble.bot {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      color: #333;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .msg-bubble.user {
+      background: #2196f3;
+      color: #ffffff;
+      border: none;
+    }
+    .msg-time {
+      font-size: 11px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .msg-meta {
+      max-width: 70%;
+    }
+    .input-area {
+      padding: 12px 16px;
+      border-top: 1px solid #e0e0e0;
+      background: #ffffff;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .input-textarea {
+      flex: 1;
+      min-height: 40px;
+      max-height: 120px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 8px 10px;
+      resize: none;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .send-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .send-btn.enabled {
+      background: #2196f3;
+      color: #ffffff;
+    }
+    .send-btn.disabled {
+      background: #e0e0e0;
+      color: #999999;
+      cursor: not-allowed;
+    }
+    .quick-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .quick-btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #2196f3;
+      background: transparent;
+      color: #2196f3;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .quick-btn:hover {
+      background: #e3f2fd;
+    }
+
+    .pref-column {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .pref-card {
+      flex: 1;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .pref-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f5f5f5;
+    }
+    .pref-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pref-title-bar {
+      width: 4px;
+      height: 18px;
+      background: #2196f3;
+      border-radius: 2px;
+    }
+    .pref-reset-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .pref-reset-btn:hover {
+      background: #ffebee;
+      border-color: #ff5252;
+      color: #ff5252;
+    }
+    .pref-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 4px;
+    }
+    .pref-item {
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px dashed #e0e0e0;
+      background: #fafafa;
+      font-size: 13px;
+    }
+    .pref-item.has {
+      border-style: solid;
+    }
+    .pref-label {
+      font-size: 11px;
+      color: #999;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .pref-value {
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .pref-empty {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .bottom-results {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      padding: 16px 20px;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .results-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .results-close-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      background: #ffffff;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+    }
+    .results-close-btn:hover {
+      background: #f5f5f5;
+    }
+    .result-item {
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .result-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .result-location {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .result-desc {
+      font-size: 13px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="top-row">
+    <!-- 왼쪽: 채팅 영역 -->
+    <div class="chat-column">
+      <div class="chat-header">
+        <div>
+          <h1 class="chat-title">AI 챗봇 일자리 검색</h1>
+          <div class="chat-subtitle">원하시는 조건을 자유롭게 말씀해주세요</div>
+        </div>
+        <button class="chat-clear-btn" id="clearBtn">
+          🗑️ 대화 내역 삭제
+        </button>
+      </div>
+
+      <div class="chat-box">
+        <div class="messages" id="messages"></div>
+        <div class="input-area">
+          <textarea
+            id="inputText"
+            class="input-textarea"
+            rows="1"
+            placeholder="메시지를 입력하세요... (Enter: 전송, Shift+Enter: 줄바꿈)"
+          ></textarea>
+          <button id="sendBtn" class="send-btn disabled">전송</button>
+        </div>
+      </div>
+
+      <div class="quick-buttons">
+        <button class="quick-btn">강남에서 주 5일 서빙 일자리</button>
+        <button class="quick-btn">시급 2만원 이상 카페</button>
+        <button class="quick-btn">주말만 가능한 배달</button>
+        <button class="quick-btn">일자리 추천 받기</button>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 조건 카드 -->
+    <div class="pref-column">
+      <div class="pref-card">
+        <div class="pref-header">
+          <div class="pref-title">
+            <div class="pref-title-bar"></div>
+            <span>일자리 검색 조건</span>
+          </div>
+          <button class="pref-reset-btn" id="resetPrefBtn">초기화</button>
+        </div>
+        <div class="pref-list" id="prefList"></div>
+        <div class="pref-empty" id="prefEmpty">
+          입력된 조건이 없습니다.<br/>
+          챗봇에 조건을 말해주시면<br/>
+          여기에서 확인할 수 있습니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 아래: 검색 결과 -->
+  <div class="bottom-results" id="resultsSection" style="display:none;">
+    <div class="results-header">
+      <div class="results-title" id="resultsTitle">검색 결과</div>
+      <button class="results-close-btn" id="closeResultsBtn">결과 닫기</button>
+    </div>
+    <div id="resultsList"></div>
+  </div>
+</div>
+
+<script>
+  // -----------------------------
+  // 상태
+  // -----------------------------
+  const CHAT_STORAGE_KEY = "html_chat_messages";
+  const PREF_STORAGE_KEY = "html_chat_preferences";
+
+  let messages = [];
+  let preferences = {
+    gender: null,
+    age: null,
+    place: null,
+    work_days: null,
+    start_time: null,
+    end_time: null,
+    hourly_wage: null,
+    requirements: null,
+    category: null,
+    categories: null,
+    job_text: null,
+    person_text: null
+  };
+  let searchResults = [];
+
+  const welcomeText =
+    '안녕하세요! AI GigWork 챗봇입니다. 원하시는 일자리 조건을 자유롭게 말씀해주세요.\n' +
+    '예: "강남에서 주 5일, 시급 15,000원 이상 서빙 일자리 찾아줘"';
+
+  // -----------------------------
+  // 초기 로드
+  // -----------------------------
+  function loadState() {
+    try {
+      const savedMsgs = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || "[]");
+      const savedPrefs = JSON.parse(localStorage.getItem(PREF_STORAGE_KEY) || "null");
+
+      messages = Array.isArray(savedMsgs) ? savedMsgs : [];
+      if (!messages.length) {
+        messages.push({
+          text: welcomeText,
+          sender: "bot",
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      if (savedPrefs && typeof savedPrefs === "object") {
+        preferences = { ...preferences, ...savedPrefs };
+      }
+    } catch (e) {
+      messages = [{
+        text: welcomeText,
+        sender: "bot",
+        timestamp: new Date().toISOString()
+      }];
+    }
+  }
+
+  // -----------------------------
+  // 저장
+  // -----------------------------
+  function saveMessages() {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+  }
+
+  function savePreferences() {
+    localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(preferences));
+  }
+
+  // -----------------------------
+  // 시간 포맷
+  // -----------------------------
+  function formatTime(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return "";
+    }
+  }
+
+  // -----------------------------
+  // 메시지 렌더링
+  // -----------------------------
+  function renderMessages() {
+    const box = document.getElementById("messages");
+    box.innerHTML = "";
+    messages.forEach((m) => {
+      const row = document.createElement("div");
+      row.className = "msg-row " + (m.sender === "user" ? "user" : "bot");
+
+      const meta = document.createElement("div");
+      meta.className = "msg-meta";
+
+      const bubble = document.createElement("div");
+      bubble.className = "msg-bubble " + (m.sender === "user" ? "user" : "bot");
+      bubble.textContent = m.text || "";
+      meta.appendChild(bubble);
+
+      const time = document.createElement("div");
+      time.className = "msg-time";
+      time.textContent = formatTime(m.timestamp);
+      meta.appendChild(time);
+
+      row.appendChild(meta);
+      box.appendChild(row);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // -----------------------------
+  // 조건 포맷터 (place, category 등)
+  // -----------------------------
+  function formatConditionValue(val, key) {
+    if (val === null || val === undefined) return null;
+
+    if (typeof val === "string" || typeof val === "number") {
+      return String(val);
+    }
+
+    if (Array.isArray(val)) {
+      const items = val.map((item) => {
+        if (key === "work_days" && (typeof item === "string" || typeof item === "number")) {
+          const d = new Date(String(item));
+          if (!isNaN(d.getTime())) {
+            return d.toISOString().slice(0, 10);
+          }
+          return String(item);
+        }
+
+        if (typeof item === "object" && item !== null) {
+          if ("region1" in item || "region2" in item) {
+            const parts = [];
+            if (item.region1) parts.push(String(item.region1));
+            if (item.region2) parts.push(String(item.region2));
+            return parts.join(" ");
+          }
+          const catKeys = Object.keys(item).filter((k) =>
+            k.toLowerCase().includes("category") || k.toLowerCase().includes("cat")
+          );
+          if (catKeys.length > 0) {
+            return catKeys.map((k) => item[k]).filter(Boolean).join(" / ");
+          }
+          return Object.values(item)
+            .map((v) => (v == null ? "" : String(v)))
+            .filter(Boolean)
+            .join(" ");
+        }
+        return String(item);
+      }).filter(Boolean);
+      return items.join(", ");
+    }
+
+    if (typeof val === "object") {
+      if ("region1" in val || "region2" in val) {
+        const parts = [];
+        if (val.region1) parts.push(String(val.region1));
+        if (val.region2) parts.push(String(val.region2));
+        return parts.join(" ");
+      }
+      const catKeys = Object.keys(val).filter((k) =>
+        k.toLowerCase().includes("category") || k.toLowerCase().includes("cat")
+      );
+      if (catKeys.length > 0) {
+        return catKeys.map((k) => val[k]).filter(Boolean).join(" / ");
+      }
+      return Object.values(val)
+        .map((v) => (v == null ? "" : String(v)))
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    return null;
+  }
+
+  // -----------------------------
+  // 조건 렌더링
+  // -----------------------------
+  function renderPreferences() {
+    const list = document.getElementById("prefList");
+    const empty = document.getElementById("prefEmpty");
+    list.innerHTML = "";
+
+    const items = [
+      { key: "job_text", label: "하고 싶은 일" },
+      { key: "person_text", label: "내 정보" },
+      { key: "place", label: "지역" },
+      { key: "category", label: "직종(단일)" },
+      { key: "categories", label: "직종(복수)" },
+      { key: "work_days", label: "근무일" },
+      { key: "hourly_wage", label: "시급" },
+      { key: "start_time", label: "시작시간" },
+      { key: "end_time", label: "종료시간" },
+      { key: "gender", label: "성별" },
+      { key: "age", label: "나이" }
+    ];
+
+    const hasAny = Object.values(preferences).some((v) => v !== null && v !== "");
+
+    items.forEach((it) => {
+      let v = preferences[it.key];
+      if (it.key === "hourly_wage" && v != null) {
+        v = Number(v).toLocaleString() + "원";
+      }
+      if (it.key === "age" && v != null) {
+        v = String(v) + "세";
+      }
+
+      const hasValue = v !== null && v !== undefined && v !== "";
+
+      const div = document.createElement("div");
+      div.className = "pref-item" + (hasValue ? " has" : "");
+      div.style.borderColor = hasValue ? "#2196f320" : "#e0e0e0";
+      div.style.backgroundColor = hasValue ? "#ffffff" : "#fafafa";
+
+      const label = document.createElement("div");
+      label.className = "pref-label";
+      label.textContent = it.label;
+      div.appendChild(label);
+
+      const value = document.createElement("div");
+      value.className = "pref-value";
+      value.textContent = hasValue ? v : "미입력";
+      div.appendChild(value);
+
+      list.appendChild(div);
+    });
+
+    empty.style.display = hasAny ? "none" : "block";
+  }
+
+  // -----------------------------
+  // 검색 결과 렌더링
+  // -----------------------------
+  function renderSearchResults() {
+    const section = document.getElementById("resultsSection");
+    const list = document.getElementById("resultsList");
+    const titleEl = document.getElementById("resultsTitle");
+
+    if (!searchResults.length) {
+      section.style.display = "none";
+      return;
+    }
+
+    section.style.display = "block";
+    titleEl.textContent = `검색 결과 (${searchResults.length}개)`;
+    list.innerHTML = "";
+
+    searchResults.forEach((job, idx) => {
+      const item = document.createElement("div");
+      item.className = "result-item";
+
+      const t = document.createElement("div");
+      t.className = "result-title";
+      t.textContent = job.title || `(제목 없음)`;
+      item.appendChild(t);
+
+      const loc = document.createElement("div");
+      loc.className = "result-location";
+      loc.textContent = "📍 " + (job.location || "지역 정보 없음");
+      item.appendChild(loc);
+
+      const desc = document.createElement("div");
+      desc.className = "result-desc";
+      const d = (job.description || "").slice(0, 50);
+      desc.textContent = d + (job.description && job.description.length > 50 ? "..." : "");
+      item.appendChild(desc);
+
+      list.appendChild(item);
+    });
+  }
+
+  // -----------------------------
+  // 메시지 추가
+  // -----------------------------
+  function addMessage(text, sender) {
+    messages.push({
+      text: text,
+      sender: sender,
+      timestamp: new Date().toISOString()
+    });
+    saveMessages();
+    renderMessages();
+  }
+
+  // -----------------------------
+  // 서버 호출 (/chat)
+  // -----------------------------
+  async function callChatAPI(userText) {
+    const payload = {
+      text: userText,
+      condition: preferences,
+      search: false
+    };
+
+    const res = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+
+    const data = await res.json();
+    console.log("응답:", data);
+    return data;
+  }
+
+  // -----------------------------
+  // 응답 처리 (condition, llm_response, result)
+  // -----------------------------
+  function applyResponseToState(data) {
+    // llm_response
+    let llmText = "";
+    const lr = data.llm_response;
+    if (typeof lr === "string" || typeof lr === "number") {
+      llmText = String(lr);
+    } else if (lr && typeof lr === "object") {
+      llmText = typeof lr.text === "string" ? lr.text : JSON.stringify(lr);
+    } else {
+      llmText = "응답을 이해하지 못했습니다.";
+      console.warn("알 수 없는 llm_response 형식:", lr);
+    }
+
+    // condition
+    const cond = data.condition || {};
+    const newPrefs = { ...preferences };
+
+    if ("place" in cond) {
+      newPrefs.place = formatConditionValue(cond.place, "place");
+    }
+    if ("category" in cond) {
+      // 배열일 수도 있고 단일일 수도 있으니 문자열로 합침
+      const catStr = formatConditionValue(cond.category, "category");
+      newPrefs.categories = catStr;
+      if (!newPrefs.category) newPrefs.category = catStr;
+    }
+    if ("work_days" in cond) {
+      newPrefs.work_days = formatConditionValue(cond.work_days, "work_days");
+    }
+    if ("start_time" in cond) {
+      newPrefs.start_time = cond.start_time;
+    }
+    if ("end_time" in cond) {
+      newPrefs.end_time = cond.end_time;
+    }
+    if ("hourly_wage" in cond) {
+      newPrefs.hourly_wage = cond.hourly_wage;
+    }
+    if ("job_text" in cond) {
+      newPrefs.job_text = cond.job_text;
+    }
+    if ("person_text" in cond) {
+      newPrefs.person_text = cond.person_text;
+    }
+    if ("gender" in cond) {
+      newPrefs.gender = cond.gender;
+    }
+    if ("age" in cond) {
+      newPrefs.age = cond.age;
+    }
+    if ("requirements" in cond) {
+      newPrefs.requirements = cond.requirements;
+    }
+
+    preferences = newPrefs;
+    savePreferences();
+    renderPreferences();
+
+    // result
+    if (Array.isArray(data.result) && data.result.length > 0) {
+      searchResults = data.result;
+      renderSearchResults();
+    }
+
+    return llmText;
+  }
+
+  // -----------------------------
+  // 전송 처리
+  // -----------------------------
+  async function handleSend() {
+    const inputEl = document.getElementById("inputText");
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    inputEl.value = "";
+    updateSendButtonState();
+
+    try {
+      const data = await callChatAPI(text);
+      const botReply = applyResponseToState(data);
+      addMessage(botReply, "bot");
+    } catch (e) {
+      console.error(e);
+      addMessage("서버 오류가 발생했습니다.", "bot");
+    }
+  }
+
+  // -----------------------------
+  // 대화 삭제
+  // -----------------------------
+  function clearHistory() {
+    messages = [{
+      text: welcomeText,
+      sender: "bot",
+      timestamp: new Date().toISOString()
+    }];
+    saveMessages();
+    renderMessages();
+  }
+
+  // -----------------------------
+  // 조건 초기화
+  // -----------------------------
+  function resetPreferences() {
+    preferences = {
+      gender: null,
+      age: null,
+      place: null,
+      work_days: null,
+      start_time: null,
+      end_time: null,
+      hourly_wage: null,
+      requirements: null,
+      category: null,
+      categories: null,
+      job_text: null,
+      person_text: null
+    };
+    savePreferences();
+    renderPreferences();
+  }
+
+  // -----------------------------
+  // 버튼 활성/비활성
+  // -----------------------------
+  function updateSendButtonState() {
+    const inputEl = document.getElementById("inputText");
+    const btn = document.getElementById("sendBtn");
+    if (inputEl.value.trim()) {
+      btn.className = "send-btn enabled";
+    } else {
+      btn.className = "send-btn disabled";
+    }
+  }
+
+  // -----------------------------
+  // 이벤트 바인딩
+  // -----------------------------
+  function bindEvents() {
+    const sendBtn = document.getElementById("sendBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const resetPrefBtn = document.getElementById("resetPrefBtn");
+    const inputEl = document.getElementById("inputText");
+    const closeResultsBtn = document.getElementById("closeResultsBtn");
+
+    sendBtn.addEventListener("click", () => {
+      if (sendBtn.classList.contains("enabled")) {
+        handleSend();
+      }
+    });
+
+    clearBtn.addEventListener("click", clearHistory);
+    resetPrefBtn.addEventListener("click", resetPreferences);
+    closeResultsBtn.addEventListener("click", () => {
+      searchResults = [];
+      renderSearchResults();
+    });
+
+    inputEl.addEventListener("input", updateSendButtonState);
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        const btn = document.getElementById("sendBtn");
+        if (btn.classList.contains("enabled")) {
+          handleSend();
+        }
+      }
+    });
+
+    document.querySelectorAll(".quick-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        inputEl.value = btn.textContent || "";
+        updateSendButtonState();
+        handleSend();
+      });
+    });
+  }
+
+  // -----------------------------
+  // 시작
+  // -----------------------------
+  loadState();
+  renderMessages();
+  renderPreferences();
+  renderSearchResults();
+  bindEvents();
+  updateSendButtonState();
+</script>
+</body>
+</html>

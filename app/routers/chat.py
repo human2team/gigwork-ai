@@ -35,3 +35,54 @@ def chat_endpoint(payload: ChatRequest):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"서버 내부 오류: {str(e)}")
+
+
+"""
+{
+  "condition": {
+    "place": [ 
+      { "region1": "서울", "region2": "강남구" }
+    ],
+    "category": [
+      { "category1": "병원·간호·연구", "category2": "생동성·임상시험" }
+    ],
+    "work_days": ["2025-12-03"],
+    "start_time": "09:00",
+    "end_time": "18:00",
+    "hourly_wage": 15000,
+    "job_text": null,
+    "person_text": null
+  },
+  "llm_response": "조건을 업데이트했습니다.",
+  "result": [
+    {
+      "title": "강남 생동성 시험 보조",
+      "location": "서울 강남구",
+      "description": "임상 시험 보조 업무이며...",
+      "id": 32
+    }
+  ]
+}
+"""
+
+"""
+
+{
+  "text": "강남에서 주 5일 서빙 알바 찾아줘",
+  "condition": {
+    "gender": null,
+    "age": null,
+    "place": null,
+    "work_days": null,
+    "start_time": null,
+    "end_time": null,
+    "hourly_wage": null,
+    "requirements": null,
+    "category": null,
+    "categories": null,
+    "job_text": null,
+    "person_text": null
+  },
+  "search": false
+}
+"""
